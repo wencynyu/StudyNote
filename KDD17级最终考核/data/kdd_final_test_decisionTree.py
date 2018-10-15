@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 from collections import Counter
@@ -137,10 +138,11 @@ def predict(test_data_set_X, root):
     :param root: 根结点（循环为数）
     :return: 返回预测值
     """
-    predict_data = None
+    predict_data = []
     for i in range(len(test_data_set_X)):
         while root.rgt_child is not None:
-
+            if test_data_set_X[i, root.lft_child[1]] < root.lft_value:  # root.lft_child保存了列索引的名称和列()
+                predict_data.append(root.lft_child[0])
             root = root.rgt_child
     return predict_data
 
@@ -153,6 +155,7 @@ def judge(predict_data, test_data_set_y):
     :return: 返回准确率
     """
     correct_num = 0
+    test_data_set_y.reshape(len(predict_data))
     for i in range(len(predict_data)):
         if predict_data[i] == test_data_set_y[i]:
             correct_num += 1
@@ -160,8 +163,25 @@ def judge(predict_data, test_data_set_y):
     return accurate_rate
 
 
+def save_the_decision_tree(root, path):
+    """
+    通过创建好的决策树的根结点来保存一棵决策树模型至对应的目录
+    :param root: 决策树根结点
+    :param path: 目录的路径
+    :return:
+    """
+    pass
+
+
+def load_a_decision_tree(file):
+    root = Node()
+    pass
+
+
 if __name__ == "__main__":
     root = Node()
     data = pd.read_csv('./train.csv')
     train_data_set_X, train_data_set_y, test_data_set_X, test_data_set_y = data_process(data, 0.7, 0)  # 70%的数据用作训练，数据标签值为第一列
     create_tree(root, train_data_set_X, train_data_set_y)
+    predict_data = predict(test_data_set_X, root)
+    print("精确度为：", judge(predict_data, test_data_set_y) * 100, "%")
