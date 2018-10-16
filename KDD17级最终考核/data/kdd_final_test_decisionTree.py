@@ -89,6 +89,8 @@ def find_best_node(X, y):
     for node in range(X.shape[1]):  # 对每一属性（node）进行遍历
         sorted_index = np.argsort(X[:, node])  # node列进行索引排序
         for i in range(1, X.shape[0]):  # 对每一属性值（value）进行遍历
+            if i % 20 == 0:
+                print("目前正在索引", node, "维度", "第", i, "行数据")
             if X[sorted_index[i - 1], node] != X[sorted_index[i], node]:
                 value = (X[sorted_index[i - 1], node] + X[sorted_index[i], node]) / 2
                 X_l, X_r, y_l, y_r = splite(X, y, node, value)
@@ -97,6 +99,7 @@ def find_best_node(X, y):
                     best_entropy = e
                     best_node = node
                     best_value = value
+                    print("找到最佳维度：", best_node, "最佳阈值：", best_value)
     return best_entropy, best_node, best_value
 
 
