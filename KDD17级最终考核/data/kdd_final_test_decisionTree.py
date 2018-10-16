@@ -1,4 +1,5 @@
 import os
+import pickle  # 用于保存对象文件
 import numpy as np
 import pandas as pd
 from collections import Counter
@@ -36,9 +37,9 @@ def data_process(data, rate, lable_pos=None):
     if lable_pos is None:
         return train_set, test_set
     else:
-        train_set_y = train_set[lable_pos]
+        train_set_y = train_set[:, lable_pos]
         train_set_X = np.delete(train_set, lable_pos, 1)  # 分出标签值以后在属性集中就删除该列
-        test_set_y = test_set[lable_pos]
+        test_set_y = test_set[:, lable_pos]
         test_set_X = np.delete(test_set, lable_pos, 1)
         return train_set_X, train_set_y, test_set_X, test_set_y
 
@@ -69,7 +70,7 @@ def calc_entropy(y):
     res = 0.0
     for num in counter.values():
         p = num / len(y)
-        res += -p * np.log(y)  # 香农熵 E = - p * log(p)用来表示一个数据集的混乱度，在（0，1）内越小数据集越准确
+        res += -p * np.log(p)  # 香农熵 E = - p * log(p)用来表示一个数据集的混乱度，在（0，1）内越小数据集越准确
     return res
 
 
@@ -163,19 +164,26 @@ def judge(predict_data, test_data_set_y):
     return accurate_rate
 
 
-def save_the_decision_tree(root, path):
+def save_the_decision_tree(root, path, name="decision_tree_mode"):
     """
     通过创建好的决策树的根结点来保存一棵决策树模型至对应的目录
     :param root: 决策树根结点
     :param path: 目录的路径
     :return:
     """
-    pass
+    print("---正在保存决策树模型---")
+    file_path = '{0}/{1}.{2}'.format(os.getcwd()+path, name, 'pkl')
+    while os.path.exists(file_path):
+        file_path = '{0}/{1}.{2}'.format(os.getcwd()+path, name+'(1)', 'pkl')
+    with open(file_path, 'wb+') as f:
+        pickle.dump(root, f)
+    return
 
 
-def load_a_decision_tree(file):
-    root = Node()
-    pass
+def load_a_decision_tree(file_path):
+    with open(file_path, 'rb') as f:
+        root = pickle.load(file_path)
+    return root
 
 
 if __name__ == "__main__":
