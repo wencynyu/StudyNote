@@ -10,9 +10,9 @@ class Node:
     这个Node类用来创建决策树
     """
     def __init__(self, lft_child=None, lft_value=None, rgt_child=None):
-        self.lft_child = lft_child
-        self.lft_value = lft_value
-        self.rgt_child = rgt_child
+        self.lft_child = lft_child  # (col,col_name)
+        self.lft_value = lft_value  # value
+        self.rgt_child = rgt_child  # new_node
 
 
 def data_process(data, rate, lable_pos=None):
@@ -109,12 +109,13 @@ def add_node(root, data_set_X, data_set_y):
     :return:
     """
     _, best_node, best_value = find_best_node(data_set_X, data_set_y)
-    _, train_data_set_X, _, train_data_set_y = splite(data_set_X, data_set_y, best_node, best_value)  # 找到最佳节点之后要分割原数据集
+    _, new_train_data_set_X, _, new_train_data_set_y = splite(data_set_X, data_set_y, best_node, best_value)  # 找到最佳节点之后要分割原数据集
                                                                                                       # 用作下次增加节点（分类）的数据
-    root.lft_child = data.columns[best_node], best_node
+    root.lft_child = data_set_X.columns[best_node], best_node
     root.lft_value = best_value
+    print("本次划分的维度为：", root.lft_child[1], "名称为：", root.lft_child[0], "阈值为：", root.lft_value)
     root.rgt_child = Node()  # 创建新的右节点
-    return train_data_set_X, train_data_set_y  # 返回新的右子数据
+    return new_train_data_set_X, new_train_data_set_y  # 返回新的右子数据
 
 
 def create_tree(root, data_set_X, data_set_y, layer=5):
@@ -126,6 +127,7 @@ def create_tree(root, data_set_X, data_set_y, layer=5):
     :param layer: 循环的层数，默认为5，即划分五次，分出六类
     :return:
     """
+    print("---开始创建决策树---")
     for i in range(layer):
         data_set_X, data_set_y = add_node(root, data_set_X, data_set_y)
         root = root.rgt_child
@@ -190,6 +192,6 @@ if __name__ == "__main__":
     root = Node()
     data = pd.read_csv('./train.csv')
     train_data_set_X, train_data_set_y, test_data_set_X, test_data_set_y = data_process(data, 0.7, 0)  # 70%的数据用作训练，数据标签值为第一列
-    create_tree(root, train_data_set_X, train_data_set_y)
+    create_tree(root, train_data_set_X, train_data_set_y, layer=1)
     predict_data = predict(test_data_set_X, root)
     print("精确度为：", judge(predict_data, test_data_set_y) * 100, "%")
