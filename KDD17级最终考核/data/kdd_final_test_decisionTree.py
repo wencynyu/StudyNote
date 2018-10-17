@@ -151,20 +151,19 @@ def predict(test_data_set_X, root):
     :param root: 根结点（循环为数）
     :return: 返回预测值
     """
-    print(test_data_set_X)
+    print(len(test_data_set_X))
     predict_data = []
     # print(len(test_data_set_X))
     for i in range(len(test_data_set_X)):
         node = root
         while node.rgt_child is not None:
-            if i % 50 == 0:
-                print("正在根据", root.lft_child, "维度", root.lft_value, "判断")
-            if test_data_set_X[i, root.lft_child[1]] < root.lft_value:  # root.lft_child保存了列索引的名称和列()
-                predict_data.append(root.lft_lable)
-                # print(predict_data)
-            else:
-                predict_data.append(root.rgt_lable)
+            if i % 10000 == 0:
+                print("正在根据", node.lft_child, "维度", node.lft_value, "判断")
+            if test_data_set_X[i, node.lft_child[1]] < node.lft_value:  # root.lft_child保存了列索引的名称和列()
+                predict_data.append(node.lft_lable)
             node = node.rgt_child
+            if node is None:
+                predict_data.append(node.rgt_lable)
     return predict_data
 
 
@@ -203,16 +202,25 @@ def save_the_decision_tree(root, path='', name="decision_tree_mode"):
 
 def load_a_decision_tree(file_path):
     with open(file_path, 'rb') as f:
-        root = pickle.load(file_path)
+        root = pickle.load(f)
     return root
 
 
+def print_decision_tree(root):
+    while root.rgt_child is not None:
+        print(root.lft_child, ',', root.lft_value, ',', root.lft_lable)
+        root = root.rgt_child
+        if root is None:
+            print(root.rgt_lable)
+
+
 if __name__ == "__main__":
-    root = Node()
+    # root = Node()
     data = pd.read_csv('./train.csv')
     train_data_set_X, train_data_set_y, test_data_set_X, test_data_set_y = data_process(data, 0.7, 0)  # 70%的数据用作训练，数据标签值为第一列
-    create_tree(root, data, train_data_set_X, train_data_set_y, layer=10)
-    save_the_decision_tree(root)
+    # create_tree(root, data, train_data_set_X, train_data_set_y, layer=10)
+    # save_the_decision_tree(root)
+    root = load_a_decision_tree("decision_tree_mode.pkl")
     predict_data = predict(test_data_set_X, root)
     print(predict_data)
     print("精确度为：", judge(predict_data, test_data_set_y) * 100, "%")
